@@ -67,9 +67,11 @@
             document.getElementById("qrCodeInput").value = decodedText;
 
             // Hide the QR code scanner and show the rescan button
-            html5QrCodeScanner.clear();
             document.getElementById("reader").style.display = "none";
             document.getElementById("rescanButton").style.display = "block";
+
+            // Stop the QR scanner
+            html5QrCodeScanner.clear();
         }
 
         // Function to start the QR scanner with the back camera as default
@@ -81,7 +83,7 @@
                     qrbox: 250 // Scanning box size
                 },
                 onScanSuccess
-            );
+            ).catch(err => console.error(`Unable to start scanning: ${err}`));
         }
 
         // Initialize the QR scanner on page load
@@ -142,8 +144,11 @@
             })
             .then(response => response.json())
             .then(data => {
-                console.log(data);
-                alert("Form submitted successfully!");
+                if (data.success) {
+                    alert("Form submitted successfully!");
+                } else {
+                    alert("Submission failed. Please try again.");
+                }
                 // Optionally reset the form after successful submission
                 document.getElementById("userForm").reset();
                 document.getElementById("qrCodeInput").value = "";
