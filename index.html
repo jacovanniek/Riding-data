@@ -3,162 +3,158 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QR Code Scanner Form</title>
+    <title>QR Code Scanner and Form</title>
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 20px;
         }
-        #reader {
-            width: 300px;
-            margin: 0 auto;
+        #qr-reader {
+            width: 100%;
+            margin-bottom: 10px;
         }
-        form {
-            max-width: 400px;
-            margin: 20px auto;
-            display: flex;
-            flex-direction: column;
+        #qr-reader-results {
+            margin-bottom: 20px;
+            font-weight: bold;
         }
-        input {
-            margin: 10px 0;
-            padding: 10px;
-            font-size: 16px;
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input[type="text"], input[type="email"], input[type="tel"] {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
         }
         button {
-            padding: 10px;
-            font-size: 16px;
-            background-color: #4CAF50;
+            padding: 10px 15px;
+            background-color: #007bff;
             color: white;
             border: none;
             cursor: pointer;
         }
         button:hover {
-            background-color: #45a049;
+            background-color: #0056b3;
         }
     </style>
 </head>
 <body>
 
-    <h1>Scan QR Code and Submit Details</h1>
+    <h1>Scan QR Code and Enter Details</h1>
 
-    <!-- QR Code Scanner -->
-    <div id="reader"></div>
+    <!-- QR code reader -->
+    <div id="qr-reader"></div>
 
-    <!-- Button to rescan QR code -->
-    <button id="rescanButton" style="display: none;">Rescan QR Code</button>
+    <!-- Display scanned QR code -->
+    <div id="qr-reader-results">Scanned QR Code: <span id="qrCode"></span></div>
 
-    <!-- Form to enter user details -->
+    <!-- Form for user details -->
     <form id="userForm">
-        <label for="qrCodeInput">Scanned QR Code</label>
-        <input type="text" id="qrCodeInput" name="qrCodeInput" placeholder="QR Code will appear here" readonly required>
-        <input type="text" id="name" name="name" placeholder="Enter Name" required>
-        <input type="email" id="email" name="email" placeholder="Enter Email" required>
-        <input type="tel" id="phone" name="phone" placeholder="Enter Phone" required>
+        <div class="form-group">
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" required>
+        </div>
+        <div class="form-group">
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required>
+        </div>
+        <div class="form-group">
+            <label for="phone">Phone:</label>
+            <input type="tel" id="phone" name="phone" required>
+        </div>
+
+        <!-- Button to submit the form -->
         <button type="submit">Submit</button>
     </form>
 
-    <!-- QR Code Library -->
-    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <!-- Button to recapture the QR code -->
+    <button id="recaptureBtn" style="display: none;">Recapture QR Code</button>
 
     <script>
-        // Function called when QR code is successfully scanned
-        function onScanSuccess(decodedText, decodedResult) {
-            // Set the QR code value into the visible form field
-            document.getElementById("qrCodeInput").value = decodedText;
+        let qrCodeResult = "";
+        const qrCodeElement = document.getElementById("qrCode");
+        const recaptureBtn = document.getElementById("recaptureBtn");
+        const form = document.getElementById("userForm");
 
-            // Hide the QR code scanner and show the rescan button
-            document.getElementById("reader").style.display = "none";
-            document.getElementById("rescanButton").style.display = "block";
-
-            // Stop the QR scanner
-            html5QrCodeScanner.clear();
-        }
-
-        // Function to start the QR scanner with the back camera as default
+        // Function to start the QR scanner
         function startQrScanner() {
-            html5QrCodeScanner.start(
-                { facingMode: "environment" },  // Use the back camera
+            const html5QrCode = new Html5Qrcode("qr-reader");
+
+            html5QrCode.start(
+                { facingMode: "environment" }, // Use back camera by default
                 {
-                    fps: 10,   // Frame rate for scanning
-                    qrbox: 250 // Scanning box size
+                    fps: 10, // Frames per second
+                    qrbox: { width: 250, height: 250 } // Scanning box size
                 },
-                onScanSuccess
-            ).catch(err => console.error(`Unable to start scanning: ${err}`));
+                qrCodeMessage => {
+                    // Set the scanned QR code result to the span element
+                    qrCodeElement.innerText = qrCodeMessage;
+                    qrCodeResult = qrCodeMessage;
+
+                    // Hide QR code scanner and show recapture button
+                    html5QrCode.stop().then(() => {
+                        document.getElementById("qr-reader").style.display = "none";
+                        recaptureBtn.style.display = "block";
+                    }).catch(err => {
+                        console.error("Error stopping the QR Code scanner: ", err);
+                    });
+                },
+                errorMessage => {
+                    console.warn(`QR Code no match: ${errorMessage}`);
+                }
+            ).catch(err => {
+                console.error("Unable to start QR code scanning: ", err);
+            });
         }
 
-        // Initialize the QR scanner on page load
-        const html5QrCodeScanner = new Html5Qrcode("reader", {
-            experimentalFeatures: {
-                useBarCodeDetectorIfSupported: true
-            },
-            formatsToSupport: [ Html5QrcodeSupportedFormats.QR_CODE ]
+        // Function to recapture the QR code
+        recaptureBtn.addEventListener("click", function() {
+            document.getElementById("qr-reader").style.display = "block";
+            recaptureBtn.style.display = "none";
+            qrCodeElement.innerText = ""; // Clear previous QR code
+            qrCodeResult = ""; // Reset QR code result
+            startQrScanner(); // Restart QR code scanning
         });
 
-        // Start scanning when the page loads
-        startQrScanner();
+        // Start QR scanner on page load
+        window.onload = startQrScanner;
 
-        // Handle rescan button click
-        document.getElementById("rescanButton").addEventListener("click", function() {
-            // Show the QR code scanner again
-            document.getElementById("reader").style.display = "block";
-            document.getElementById("rescanButton").style.display = "none";
+        // Form submission
+        form.addEventListener("submit", function(event) {
+            event.preventDefault(); // Prevent default form submission
 
-            // Clear the scanned QR code field
-            document.getElementById("qrCodeInput").value = "";
-
-            // Restart the QR scanner
-            startQrScanner();
-        });
-
-        // Handle form submission
-        document.getElementById("userForm").addEventListener("submit", function(event) {
-            event.preventDefault(); // Prevent the default form submission
-
-            // Capture form data
-            const qrCodeValue = document.getElementById("qrCodeInput").value;
-            const name = document.getElementById("name").value;
-            const email = document.getElementById("email").value;
-            const phone = document.getElementById("phone").value;
-
-            // Ensure that a QR code was scanned before submission
-            if (!qrCodeValue) {
-                alert("Please scan a QR code first.");
-                return;
-            }
-
-            // Data to send to Google Sheets
+            // Create the data object to send
             const formData = {
-                qrCodeValue: qrCodeValue,
-                name: name,
-                email: email,
-                phone: phone
+                qrCodeValue: qrCodeResult,
+                name: document.getElementById("name").value,
+                email: document.getElementById("email").value,
+                phone: document.getElementById("phone").value,
             };
 
-            // Send the data using the fetch API
-            fetch('https://script.google.com/macros/s/AKfycbw1Q0_njL9TSOqFbaKsC5LIa07LACHgQWCL13b075Xpv5lan21MbovKQ4NINQMrV2P9Pw/exec', {
-                method: 'POST',
+            // Send the data to Google Apps Script
+            fetch("https://script.google.com/macros/s/AKfycbx1psF1DHhhMOdY6s5GsaDqmEhtlB77rBDrW1fOvoVVcgXI-ai8sC93MDNmRBjZLP-c/exec", {
+                method: "POST",
                 headers: {
-                    'Content-Type': 'application/json'
+                    "Content-Type": "application/json",
                 },
-                body: JSON.stringify(formData)
+                body: JSON.stringify(formData),
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert("Form submitted successfully!");
+            .then((response) => response.json())
+            .then((data) => {
+                if (data.status === "success") {
+                    alert("Form submitted successfully");
+                    // Optionally, you can reset the form or perform other actions here
+                    form.reset();
+                    qrCodeElement.innerText = ""; // Clear the scanned QR code display
                 } else {
-                    alert("Submission failed. Please try again.");
+                    alert("Error submitting form");
                 }
-                // Optionally reset the form after successful submission
-                document.getElementById("userForm").reset();
-                document.getElementById("qrCodeInput").value = "";
-                document.getElementById("reader").style.display = "block";  // Show QR scanner again for next scan
-                document.getElementById("rescanButton").style.display = "none";
-                startQrScanner(); // Restart the QR code scanner
             })
-            .catch(error => {
+            .catch((error) => {
                 console.error("Error:", error);
-                alert("There was an error submitting the form.");
             });
         });
     </script>
