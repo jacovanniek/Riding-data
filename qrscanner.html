@@ -8,16 +8,19 @@
   <title>QR Code Scanner</title>
   <script src="https://unpkg.com/html5-qrcode/minified/html5-qrcode.min.js"></script>
   <style>
-    body { font-family: Arial, sans-serif; }
+    body { font-family: Arial, sans-serif; padding: 20px; }
     form { margin-top: 20px; }
     input { margin-bottom: 10px; padding: 8px; width: 100%; }
+    button { padding: 10px 20px; }
+    #qr-reader { width: 100%; max-width: 300px; margin-bottom: 20px; }
+    h1 { font-size: 1.5rem; }
   </style>
 </head>
 <body>
   <h1>QR Code Scanner & Form</h1>
 
   <!-- QR Code Scanner -->
-  <div id="qr-reader" style="width: 300px;"></div>
+  <div id="qr-reader"></div>
   <div id="qr-reader-results"></div>
 
   <!-- Form -->
@@ -25,7 +28,7 @@
     <label>Name: <input type="text" id="name" required></label><br>
     <label>Email: <input type="email" id="email" required></label><br>
     <label>Cellphone: <input type="tel" id="cellphone" required></label><br>
-    <input type="submit" value="Submit">
+    <button type="submit">Submit</button>
   </form>
 
   <script>
@@ -53,8 +56,8 @@
 
       const data = { qrCode, name, email, cellphone };
 
-      // Replace with your Google Apps Script URL
-      const url = 'YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL';
+      // Your Google Apps Script URL
+      const url = 'https://script.google.com/macros/s/AKfycbw1Q0_njL9TSOqFbaKsC5LIa07LACHgQWCL13b075Xpv5lan21MbovKQ4NINQMrV2P9Pw/exec';
 
       try {
         const response = await fetch(url, {
