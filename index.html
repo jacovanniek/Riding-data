@@ -6,6 +6,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>QR Code Scanner</title>
+  <!-- Load QR code scanner library -->
   <script src="https://unpkg.com/html5-qrcode/minified/html5-qrcode.min.js"></script>
   <style>
     body { font-family: Arial, sans-serif; padding: 20px; }
@@ -32,50 +33,65 @@
   </form>
 
   <script>
-    // Initialize QR Scanner
-    let qrCode = '';
-    function onScanSuccess(qrCodeMessage) {
-      qrCode = qrCodeMessage;
-      document.getElementById('qr-reader-results').innerText = `QR Code: ${qrCode}`;
-      document.getElementById('userForm').style.display = 'block';
-    }
-    function onScanFailure(error) { console.warn(`QR error: ${error}`); }
+    document.addEventListener('DOMContentLoaded', () => {
+      // Log to ensure the script is working
+      console.log('Page loaded successfully');
 
-    let html5QrcodeScanner = new Html5QrcodeScanner(
-      "qr-reader", { fps: 10, qrbox: 250 });
-    html5QrcodeScanner.render(onScanSuccess, onScanFailure);
-
-    // Handle form submission
-    const form = document.getElementById('userForm');
-    form.addEventListener('submit', async function(event) {
-      event.preventDefault();
-
-      const name = document.getElementById('name').value;
-      const email = document.getElementById('email').value;
-      const cellphone = document.getElementById('cellphone').value;
-
-      const data = { qrCode, name, email, cellphone };
-
-      // Your Google Apps Script URL
-      const url = 'https://script.google.com/macros/s/AKfycbw1Q0_njL9TSOqFbaKsC5LIa07LACHgQWCL13b075Xpv5lan21MbovKQ4NINQMrV2P9Pw/exec';
-
-      try {
-        const response = await fetch(url, {
-          method: 'POST',
-          body: JSON.stringify(data),
-          headers: { 'Content-Type': 'application/json' }
-        });
-        const result = await response.json();
-        if (result.status === 'success') {
-          alert('Details submitted successfully!');
-          form.reset();
-          document.getElementById('userForm').style.display = 'none';
-        } else {
-          alert('Submission failed');
-        }
-      } catch (error) {
-        console.error('Error:', error);
+      // Initialize QR Scanner
+      let qrCode = '';
+      function onScanSuccess(qrCodeMessage) {
+        qrCode = qrCodeMessage;
+        console.log('QR Code Scanned:', qrCode); // Log for debugging
+        document.getElementById('qr-reader-results').innerText = `QR Code: ${qrCode}`;
+        document.getElementById('userForm').style.display = 'block';  // Show form
       }
+
+      function onScanFailure(error) { 
+        console.warn(`QR error: ${error}`);  // Log any scanner errors
+      }
+
+      // Initialize the QR code scanner
+      try {
+        let html5QrcodeScanner = new Html5QrcodeScanner(
+          "qr-reader", { fps: 10, qrbox: 250 });
+        html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+        console.log('QR Code Scanner Initialized');
+      } catch (error) {
+        console.error('Error initializing QR code scanner:', error);  // Log any initialization errors
+      }
+
+      // Handle form submission
+      const form = document.getElementById('userForm');
+      form.addEventListener('submit', async function(event) {
+        event.preventDefault();
+
+        const name = document.getElementById('name').value;
+        const email = document.getElementById('email').value;
+        const cellphone = document.getElementById('cellphone').value;
+
+        const data = { qrCode, name, email, cellphone };
+
+        // Replace with your Google Apps Script Web App URL
+        const url = 'AKfycbw1Q0_njL9TSOqFbaKsC5LIa07LACHgQWCL13b075Xpv5lan21MbovKQ4NINQMrV2P9Pw';
+
+        try {
+          const response = await fetch(url, {
+            method: 'POST',
+            body: JSON.stringify(data),
+            headers: { 'Content-Type': 'application/json' }
+          });
+          const result = await response.json();
+          if (result.status === 'success') {
+            alert('Details submitted successfully!');
+            form.reset();
+            document.getElementById('userForm').style.display = 'none';  // Hide form again
+          } else {
+            alert('Submission failed');
+          }
+        } catch (error) {
+          console.error('Error submitting form:', error);  // Log form submission errors
+        }
+      });
     });
   </script>
 </body>
