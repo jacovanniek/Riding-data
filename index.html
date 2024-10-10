@@ -1,100 +1,134 @@
-<!-- '''Rider data website''' -->
-
+'''Rider data website'''
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>QR Code Scanner</title>
-  <!-- Load QR code scanner library -->
-  <!-- <script src="https://unpkg.com/html5-qrcode/minified/html5-qrcode.min.js"></script> -->
-  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-               
-  <style>
-    body { font-family: Arial, sans-serif; padding: 20px; }
-    form { margin-top: 20px; }
-    input { margin-bottom: 10px; padding: 8px; width: 100%; }
-    button { padding: 10px 20px; }
-    #qr-reader { width: 100%; max-width: 300px; margin-bottom: 20px; }
-    h1 { font-size: 1.5rem; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code Scanner Form</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        #reader {
+            width: 300px;
+            margin: 0 auto;
+        }
+        form {
+            max-width: 400px;
+            margin: 20px auto;
+            display: flex;
+            flex-direction: column;
+        }
+        input {
+            margin: 10px 0;
+            padding: 10px;
+            font-size: 16px;
+        }
+        button {
+            padding: 10px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
 </head>
 <body>
-  <h1>QR Code Scanner & Form</h1>
 
-  <!-- QR Code Scanner -->
-  <div id="qr-reader"></div>
-  <div id="qr-reader-results"></div>
+    <h1>Scan QR Code and Submit Details</h1>
 
-  <!-- Form -->
-  <form id="userForm" style="display: none;">
-    <label>Name: <input type="text" id="name" required></label><br>
-    <label>Email: <input type="email" id="email" required></label><br>
-    <label>Cellphone: <input type="tel" id="cellphone" required></label><br>
-    <button type="submit">Submit</button>
-  </form>
+    <!-- QR Code Scanner -->
+    <div id="reader"></div>
 
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      // Log to ensure the script is working
-      console.log('Page loaded successfully');
+    <!-- Form to enter user details -->
+    <form id="userForm">
+        <input type="text" id="name" name="name" placeholder="Enter Name" required>
+        <input type="email" id="email" name="email" placeholder="Enter Email" required>
+        <input type="tel" id="phone" name="phone" placeholder="Enter Phone" required>
+        <input type="hidden" id="qrCodeValue" name="qrCodeValue" value="">
+        <button type="submit">Submit</button>
+    </form>
 
-      // Initialize QR Scanner
-      let qrCode = '';
-      function onScanSuccess(qrCodeMessage) {
-        qrCode = qrCodeMessage;
-        console.log('QR Code Scanned:', qrCode); // Log for debugging
-        document.getElementById('qr-reader-results').innerText = `QR Code: ${qrCode}`;
-        document.getElementById('userForm').style.display = 'block';  // Show form
-      }
+    <!-- QR Code Library -->
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 
-      function onScanFailure(error) { 
-        console.warn(`QR error: ${error}`);  // Log any scanner errors
-      }
+    <script>
+        // Function called when QR code is successfully scanned
+        function onScanSuccess(decodedText, decodedResult) {
+            // Set the QR code value into the hidden form field
+            document.getElementById("qrCodeValue").value = decodedText;
 
-      // Initialize the QR code scanner
-      try {
-        let html5QrcodeScanner = new Html5QrcodeScanner(
-          "qr-reader", { fps: 10, qrbox: 250 });
-        html5QrcodeScanner.render(onScanSuccess, onScanFailure);
-        console.log('QR Code Scanner Initialized');
-      } catch (error) {
-        console.error('Error initializing QR code scanner:', error);  // Log any initialization errors
-      }
-
-      // Handle form submission
-      const form = document.getElementById('userForm');
-      form.addEventListener('submit', async function(event) {
-        event.preventDefault();
-
-        const name = document.getElementById('name').value;
-        const email = document.getElementById('email').value;
-        const cellphone = document.getElementById('cellphone').value;
-
-        const data = { qrCode, name, email, cellphone };
-
-        // Replace with your Google Apps Script Web App URL
-        const url = 'https://script.google.com/macros/s/AKfycbw1Q0_njL9TSOqFbaKsC5LIa07LACHgQWCL13b075Xpv5lan21MbovKQ4NINQMrV2P9Pw/exec';
-
-        try {
-          const response = await fetch(url, {
-            method: 'POST',
-            body: JSON.stringify(data),
-            headers: { 'Content-Type': 'application/json' }
-          });
-          const result = await response.json();
-          if (result.status === 'success') {
-            alert('Details submitted successfully!');
-            form.reset();
-            document.getElementById('userForm').style.display = 'none';  // Hide form again
-          } else {
-            alert('Submission failed');
-          }
-        } catch (error) {
-          console.error('Error submitting form:', error);  // Log form submission errors
+            // Stop the QR code scanner after successful scan
+            html5QrCodeScanner.clear();
         }
-      });
-    });
-  </script>
+
+        // Initialize the QR scanner with the primary back camera as default
+        const html5QrCodeScanner = new Html5Qrcode("reader", {
+            experimentalFeatures: {
+                useBarCodeDetectorIfSupported: true
+            },
+            formatsToSupport: [ Html5QrcodeSupportedFormats.QR_CODE ]
+        });
+
+        html5QrCodeScanner.start(
+            { facingMode: "environment" },  // Use the back camera
+            {
+                fps: 10,   // Frame rate for scanning
+                qrbox: 250 // Scanning box size
+            },
+            onScanSuccess
+        );
+
+        // Handle form submission
+        document.getElementById("userForm").addEventListener("submit", function(event) {
+            event.preventDefault(); // Prevent the default form submission
+            
+            // Capture form data
+            const name = document.getElementById("name").value;
+            const email = document.getElementById("email").value;
+            const phone = document.getElementById("phone").value;
+            const qrCodeValue = document.getElementById("qrCodeValue").value;
+
+            // Ensure that a QR code was scanned before submission
+            if (!qrCodeValue) {
+                alert("Please scan a QR code first.");
+                return;
+            }
+
+            // Data to send to Google Sheets
+            const formData = {
+                name: name,
+                email: email,
+                phone: phone,
+                qrCodeValue: qrCodeValue
+            };
+
+            // Send the data using the fetch API
+            fetch('https://script.google.com/macros/s/AKfycbw1Q0_njL9TSOqFbaKsC5LIa07LACHgQWCL13b075Xpv5lan21MbovKQ4NINQMrV2P9Pw/exec', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                alert("Form submitted successfully!");
+                // Optionally reset the form after successful submission
+                document.getElementById("userForm").reset();
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                alert("There was an error submitting the form.");
+            });
+        });
+    </script>
+
 </body>
 </html>
