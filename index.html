@@ -1,4 +1,3 @@
-'''Rider data website'''
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -44,6 +43,7 @@
 
     <!-- QR Code Scanner -->
     <div id="reader"></div>
+    <p>QR Code Value: <span id="qrCodeDisplay"></span></p>
 
     <!-- Form to enter user details -->
     <form id="userForm">
@@ -62,6 +62,9 @@
         function onScanSuccess(decodedText, decodedResult) {
             // Set the QR code value into the hidden form field
             document.getElementById("qrCodeValue").value = decodedText;
+
+            // Display the scanned QR code text on the screen
+            document.getElementById("qrCodeDisplay").innerText = decodedText;
 
             // Stop the QR code scanner after successful scan
             html5QrCodeScanner.clear();
@@ -87,7 +90,7 @@
         // Handle form submission
         document.getElementById("userForm").addEventListener("submit", function(event) {
             event.preventDefault(); // Prevent the default form submission
-            
+
             // Capture form data
             const name = document.getElementById("name").value;
             const email = document.getElementById("email").value;
@@ -109,7 +112,7 @@
             };
 
             // Send the data using the fetch API
-            fetch('https://script.google.com/macros/s/AKfycbw1Q0_njL9TSOqFbaKsC5LIa07LACHgQWCL13b075Xpv5lan21MbovKQ4NINQMrV2P9Pw/exec', {
+            fetch('https://script.google.com/macros/s/your-google-apps-script-id/exec', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -122,6 +125,7 @@
                 alert("Form submitted successfully!");
                 // Optionally reset the form after successful submission
                 document.getElementById("userForm").reset();
+                document.getElementById("qrCodeDisplay").innerText = "";
             })
             .catch(error => {
                 console.error("Error:", error);
