@@ -1,50 +1,107 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>QR Code Form</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code Data Submission</title>
     <script src="https://unpkg.com/html5-qrcode/minified/html5-qrcode.min.js"></script>
+    <style>
+        #reader {
+            width: 300px;
+            height: 300px;
+            border: 1px solid #ccc;
+            margin-bottom: 20px;
+        }
+    </style>
 </head>
 <body>
-    <h1>Submit QR Code Data</h1>
-    <div id="reader" width="600px"></div>
-    <form id="dataForm">
-        <input type="hidden" id="qrCodeValue" name="qrCodeValue" required>
-        <input type="text" id="name" name="name" placeholder="Your Name" required>
-        <input type="email" id="email" name="email" placeholder="Your Email" required>
-        <input type="text" id="phone" name="phone" placeholder="Your Phone" required>
-        <button type="submit">Submit</button>
+
+    <h1>QR Code Form</h1>
+
+    <div id="reader"></div>
+    <button id="startScan">Start QR Code Scan</button>
+    <button id="stopScan" style="display: none;">Stop QR Code Scan</button>
+
+    <form id="myForm">
+        <label for="qrCodeValue">QR Code Value:</label>
+        <input type="text" id="qrCodeValue" name="qrCodeValue" required><br><br>
+
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name" value="John Doe" required><br><br>
+
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" value="johndoe@example.com" required><br><br>
+
+        <label for="phone">Phone:</label>
+        <input type="text" id="phone" name="phone" value="123456789" required><br><br>
+
+        <input type="submit" value="Submit">
     </form>
-    <div id="result"></div>
+
+    <p id="responseMessage"></p>
 
     <script>
         const html5QrCode = new Html5Qrcode("reader");
-        html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: { width: 250, height: 250 } },
-            (decodedText, decodedResult) => {
-                document.getElementById("qrCodeValue").value = decodedText;
-            },
-            (errorMessage) => {
-                // handle error
+        let scanning = false;
+
+        // Start scanning
+        document.getElementById("startScan").addEventListener("click", () => {
+            if (!scanning) {
+                scanning = true;
+                html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: { width: 250, height: 250 } },
+                    (decodedText) => {
+                        document.getElementById("qrCodeValue").value = decodedText;
+                    },
+                    (errorMessage) => {
+                        // Handle errors here
+                    }
+                ).catch(err => {
+                    console.log("Error starting QR code scanner: ", err);
+                });
+                document.getElementById("startScan").style.display = "none";
+                document.getElementById("stopScan").style.display = "block";
             }
-        ).catch(err => {
-            console.log("Error starting the QR code scanner: ", err);
         });
 
-        document.getElementById("dataForm").addEventListener("submit", function (event) {
-            event.preventDefault();
-            const formData = new FormData(this);
-            fetch("https://script.google.com/macros/s/AKfycbwaICXHotyVGLW4FnZF7gfXU--tNBfWjlzXdT0rKdUpQ2RF9R6tO9NHmD9t9u5zDQ/exec", {
-                method: "POST",
-                body: formData
-            })
-            .then(response => response.text())
-            .then(data => {
-                document.getElementById("result").innerText = data;
-            })
-            .catch(error => {
-                console.error("Error:", error);
-                document.getElementById("result").innerText = "Submission failed: " + error.message;
-            });
+        // Stop scanning
+        document.getElementById("stopScan").addEventListener("click", () => {
+            if (scanning) {
+                scanning = false;
+                html5QrCode.stop().then(ignore => {
+                    console.log("QR Code scanning stopped.");
+                }).catch(err => {
+                    console.log("Error stopping QR code scanner: ", err);
+                });
+                document.getElementById("startScan").style.display = "block";
+                document.getElementById("stopScan").style.display = "none";
+            }
+        });
+
+        // Form submission
+        document.getElementById('myForm').addEventListener('submit', function(e) {
+            e.preventDefault(); // Prevent the default form submission
+
+            // Get form data
+            const formData = new URLSearchParams(new FormData(this)).toString();
+
+            // Update the URL with your web app deployment URL
+            const url = `https://script.google.com/macros/s/AKfycbwaICXHotyVGLW4FnZF7gfXU--tNBfWjlzXdT0rKdUpQ2RF9R6tO9NHmD9t9u5zDQ/exec?${formData}`;
+
+            // Use Fetch API to send data to the Google Apps Script
+            fetch(url)
+                .then(response => response.text())
+                .then(data => {
+                    // Display success message
+                    document.getElementById('responseMessage').innerText = 'Form submitted successfully: ' + data;
+                    console.log('Success:', data);
+                })
+                .catch((error) => {
+                    // Display error message
+                    document.getElementById('responseMessage').innerText = 'Error submitting form: ' + error;
+                    console.error('Submission error:', error);
+                });
         });
     </script>
+
 </body>
 </html>
