@@ -3,53 +3,83 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QR Code Form</title>
+    <title>QR Code Form Submission</title>
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+        }
+        input[type="text"],
+        input[type="email"],
+        input[type="tel"] {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0;
+        }
+        input[type="submit"] {
+            padding: 10px 20px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        #result {
+            margin-top: 20px;
+        }
+        #qr-reader {
+            width: 300px;
+        }
+    </style>
 </head>
 <body>
-    <h1>QR Code Scanner</h1>
-    <div id="qr-reader" style="width:300px"></div>
-    <button id="recapture-btn" style="display:none;" onclick="startScan()">Recapture QR Code</button>
-    
+
+    <h1>QR Code Form Submission</h1>
+
+    <div id="qr-reader"></div>
+
     <form id="qrForm">
-        <label for="qrCodeValue">QR Code:</label>
-        <input type="text" id="qrCodeValue" name="qrCodeValue" readonly><br><br>
+        <label for="qrCodeValue">QR Code Value:</label>
+        <input type="text" id="qrCodeValue" name="qrCodeValue" readonly required>
+
         <label for="name">Name:</label>
-        <input type="text" id="name" name="name"><br><br>
+        <input type="text" id="name" name="name" required>
+
         <label for="email">Email:</label>
-        <input type="email" id="email" name="email"><br><br>
-        <label for="phone">Phone:</label>
-        <input type="tel" id="phone" name="phone"><br><br>
-        <button type="submit">Submit</button>
+        <input type="email" id="email" name="email" required>
+
+        <label for="phone">Phone Number:</label>
+        <input type="tel" id="phone" name="phone" required>
+
+        <input type="submit" value="Submit">
     </form>
 
     <div id="result"></div>
 
     <script>
-        // Start QR code scanning
-        function startScan() {
-            const qrReader = new Html5Qrcode("qr-reader");
-            qrReader.start(
-                { facingMode: "environment" },  // default to back camera
-                { fps: 10, qrbox: { width: 250, height: 250 } },
-                qrCodeMessage => {
-                    document.getElementById('qrCodeValue').value = qrCodeMessage;
-                    qrReader.stop();
-                    document.getElementById('qr-reader').style.display = 'none';
-                    document.getElementById('recapture-btn').style.display = 'block';
-                },
-                errorMessage => {
-                    console.log(`QR Error: ${errorMessage}`);
-                }
-            ).catch(err => {
-                console.log(`Unable to start scanning: ${err}`);
-            });
+        // Initialize the QR code reader
+        function onScanSuccess(qrCodeMessage) {
+            document.getElementById('qrCodeValue').value = qrCodeMessage;
         }
 
-        // Start the scan on page load
-        window.onload = startScan;
+        function onScanError(errorMessage) {
+            console.warn(`QR Error: ${errorMessage}`);
+        }
 
-        // Form submit event
+        const html5QrCode = new Html5Qrcode("qr-reader");
+        html5QrCode.start(
+            { facingMode: "environment" }, // Use the back camera by default
+            { fps: 10, qrbox: 250 },
+            onScanSuccess,
+            onScanError
+        ).catch(err => console.error("Failed to start QR reader:", err));
+
+        // Form submission with fetch and GET request
         document.getElementById('qrForm').addEventListener('submit', async function(e) {
             e.preventDefault();  // Prevent the form from reloading the page
 
@@ -61,12 +91,12 @@
                 phone: document.getElementById('phone').value
             };
 
+            const queryString = new URLSearchParams(formData).toString();  // Convert form data to query string
+
             try {
-                // Send the POST request to Google Apps Script
-                const response = await fetch('https://script.google.com/macros/s/AKfycbwaICXHotyVGLW4FnZF7gfXU--tNBfWjlzXdT0rKdUpQ2RF9R6tO9NHmD9t9u5zDQ/exec', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(formData)
+                // Send the GET request with the form data encoded in the URL
+                const response = await fetch(`https://script.google.com/macros/s/AKfycbwaICXHotyVGLW4FnZF7gfXU--tNBfWjlzXdT0rKdUpQ2RF9R6tO9NHmD9t9u5zDQ/exec?${queryString}`, {
+                    method: 'GET'
                 });
 
                 const result = await response.json();
@@ -83,5 +113,6 @@
             }
         });
     </script>
+
 </body>
 </html>
