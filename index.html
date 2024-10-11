@@ -5,11 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Riding data user and activity info</title>
     <style>
-        input, select {
-            font-size: 16px; /* Change this value to increase/decrease size */
-            font-family: Arial, sans-serif; /* Change to your preferred font */
-            margin: 5px 0; /* Optional: adds spacing between fields */
-        }
+
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
@@ -40,18 +36,28 @@
         button:hover {
             background-color: #45a049;
         }
+        
     </style>
-    
+            <!-- input, select {
+                font-size: 16px; /* Change this value to increase/decrease size */
+                font-family: Arial, sans-serif; /* Change to your preferred font */
+                margin: 5px 0; /* Optional: adds spacing between fields */
+            } -->
+    <!-- QR Code Library -->
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+
 </head>
 <body>
 
     <img src="leatt-logo.png" alt="Logo" style="position: absolute; top: 10px; left: 10px; width: 100px; height: auto;">
     
-    <h1>Ride details</h1>
+    <!-- <h1 style="display: inline-block; margin-left: 20px; vertical-align: top;">Ride details</h1> Adjust margin-left for spacing -->
+    <h1 style="margin-top: 120px;">Ride details</h1> <!-- Adjust margin-top based on logo height -->
+
 
     <!-- QR Code Scanner Display -->
     <div id="reader" style="width: 100%;"></div>
-    <button id="stopScanner" style="display: none;">Stop Scanner</button>
+    <!-- <button id="stopScanner" style="display: none;">Stop Scanner</button> -->
 
     <!-- Form Display -->
     <form id="myForm">
@@ -76,6 +82,7 @@
         </select><br><br>
 
         <input type="submit" value="Submit">
+        <!-- <button type="submit">Submit</button> -->
     </form>
 
     <!-- <div id="qrCodeReader" style="display: none;">
@@ -85,8 +92,7 @@
 
     <p id="responseMessage"></p>
 
-    <!-- QR Code Library -->
-    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+
     
     <script>
         function onScanSuccess(decodedText, decodedResult) {
@@ -95,7 +101,14 @@
             html5QrCodeScanner.clear(); // Stop the scanner
         }
 
-        const html5QrCodeScanner = new Html5Qrcode("reader");
+        // const html5QrCodeScanner = new Html5Qrcode("reader");
+        // Initialize the QR scanner with the primary back camera as default
+        const html5QrCodeScanner = new Html5Qrcode("reader", {
+            experimentalFeatures: {
+                useBarCodeDetectorIfSupported: true
+            },
+            formatsToSupport: [ Html5QrcodeSupportedFormats.QR_CODE ]
+        });
 
         // Start scanning when the page loads
         html5QrCodeScanner.start(
