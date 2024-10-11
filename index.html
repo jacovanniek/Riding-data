@@ -45,7 +45,7 @@
         /* Spinner styles */
         .spinner {
             border: 4px solid rgba(255, 255, 255, 0.3);
-            border-top: 4px solid #4CAF50;
+            border-top: 4px solid #e02525;
             border-radius: 50%;
             width: 30px;
             height: 30px;
@@ -164,6 +164,10 @@
             document.getElementById("reader").style.display = "none";
             this.style.display = "none";
             document.getElementById("loading").style.display = "block"; // Show loading message
+
+            // Hide the introductory paragraph when loading
+            document.querySelector("p").style.display = "none"; // Hide introductory paragraph
+
 
             // Get form data
             const formData = new URLSearchParams(new FormData(this)).toString();
