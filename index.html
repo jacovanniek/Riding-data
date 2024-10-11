@@ -42,6 +42,20 @@
             text-align: center;
             margin-top: 20px;
         }
+        /* Spinner styles */
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid #4CAF50;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto; /* Center the spinner */
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
         
     </style>
             <!-- input, select {
@@ -59,7 +73,7 @@
     
     <!-- <h1 style="display: inline-block; margin-left: 20px; vertical-align: top;">Ride details</h1> Adjust margin-left for spacing -->
     <h1 style="margin-top: 120px;">Ride details</h1> <!-- Adjust margin-top based on logo height -->
-
+    <p>Please scan the QR code on your datalogger (look on the backside or under the straps) and select your activity type.</p> <!-- Introductory paragraph -->
 
     <!-- QR Code Scanner Display -->
     <div id="reader" style="width: 100%;"></div>
@@ -85,6 +99,8 @@
             <option value="MTB - Enduro / DH">MTB - Enduro / DH</option>
             <option value="Moto - ADV / General">Moto - ADV / General</option>
             <option value="Moto - MX / Enduro">Moto - MX / Enduro</option>
+            <option value="Equestrian">Equestrian</option>
+            <option value="Other">Other</option>
         </select><br><br>
 
         <input type="submit" value="Submit">
@@ -92,22 +108,12 @@
         <!-- <button type="submit">Submit</button> -->
     </form>
 
-
-
-    <!-- <div id="qrCodeReader" style="display: none;">
-        <div id="reader" style="width: 300px; height: 300px;"></div>
-        <button id="rescanBtn">Rescan QR Code</button>
-    </div> -->
-
-    <!-- 
-    <div id="loading">Submitting... Please wait...</div> // wait message 
     <p id="responseMessage"></p>
--->
-
-    <p id="responseMessage"></p>
-    <div id="loading">Loading...</div> <!-- Loading message -->
+    <div id="loading">
+        <div class="spinner"></div> <!-- Loading spinner -->
+        Loading...
+    </div> <!-- Loading message -->
     <div id="thankYou">Thank you for submitting the form!</div> <!-- Thank you message -->
-
     
     <script>
         const html5QrCodeScanner = new Html5Qrcode("reader", {
@@ -154,6 +160,7 @@
             // document.getElementById('loading').style.display = 'block';
 
             // Hide QR scanner and form fields
+            document.body.style.overflow = 'hidden'; // Prevent scrolling
             document.getElementById("reader").style.display = "none";
             this.style.display = "none";
             document.getElementById("loading").style.display = "block"; // Show loading message
