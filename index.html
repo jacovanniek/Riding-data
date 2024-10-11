@@ -20,7 +20,7 @@
             display: flex;
             flex-direction: column;
         }
-        input {
+        input, select {
             margin: 10px 0;
             padding: 10px;
             font-size: 16px;
@@ -35,6 +35,11 @@
         }
         button:hover {
             background-color: #45a049;
+        }
+        #loading {
+            display: none; /* Hide loading initially */
+            text-align: center;
+            margin-top: 20px;
         }
         
     </style>
@@ -82,6 +87,7 @@
         </select><br><br>
 
         <input type="submit" value="Submit">
+        <button type="button" id="rescanBtn">Rescan</button> <!-- rescan button-->
         <!-- <button type="submit">Submit</button> -->
     </form>
 
@@ -90,25 +96,27 @@
         <button id="rescanBtn">Rescan QR Code</button>
     </div> -->
 
+    <div id="loading">Submitting... Please wait...</div> <!-- wait message -->
     <p id="responseMessage"></p>
 
 
     
     <script>
-        function onScanSuccess(decodedText, decodedResult) {
-            document.getElementById("qrCodeValue").value = decodedText;
-            document.getElementById("qrCodeReader").style.display = "none"; // Hide QR reader
-            html5QrCodeScanner.clear(); // Stop the scanner
-        }
-
-        // const html5QrCodeScanner = new Html5Qrcode("reader");
-        // Initialize the QR scanner with the primary back camera as default
         const html5QrCodeScanner = new Html5Qrcode("reader", {
             experimentalFeatures: {
                 useBarCodeDetectorIfSupported: true
             },
-            formatsToSupport: [ Html5QrcodeSupportedFormats.QR_CODE ]
+            formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE]
         });
+
+        function onScanSuccess(decodedText, decodedResult) {
+            document.getElementById("qrCodeValue").value = decodedText;
+            html5QrCodeScanner.stop().then(() => {
+                document.getElementById("reader").style.display = "none"; // Hide QR reader after scan
+            }).catch(err => {
+                console.error("Error stopping scanner:", err);
+            });
+        }
 
         // Start scanning when the page loads
         html5QrCodeScanner.start(
@@ -119,24 +127,25 @@
             console.error("Failed to start scanning:", err);
         });
 
-        // Show QR code scanner when the page loads
-        document.getElementById("qrCodeReader").style.display = "block";
-
         // Rescan button
         document.getElementById("rescanBtn").addEventListener("click", function() {
-            document.getElementById("qrCodeReader").style.display = "block"; // Show the scanner
+            document.getElementById("reader").style.display = "block"; // Show the scanner
             html5QrCodeScanner.start(
                 { facingMode: "environment" },
                 { fps: 10, qrbox: 250 },
                 onScanSuccess
             );
         });
+        
     </script>
-    
+
     <script>
         // Form submission
         document.getElementById('myForm').addEventListener('submit', function(e) {
             e.preventDefault(); // Prevent the default form submission
+
+            // Show loading message
+            document.getElementById('loading').style.display = 'block';
 
             // Get form data
             const formData = new URLSearchParams(new FormData(this)).toString();
@@ -151,11 +160,13 @@
                     document.getElementById('responseMessage').innerText = 'Thank you for submitting the form!';
                     // document.getElementById('myForm').reset(); // Reset form fields
                     // document.getElementById('myForm').style.display = 'none'; // Hide form
+                    document.getElementById('loading').style.display = 'none'; // Hide loading message
                     console.log('Success:', data);
                 })
                 .catch((error) => {
                     document.getElementById('responseMessage').innerText = 'Error submitting form: ' + error;
                     console.error('Submission error:', error);
+                    document.getElementById('loading').style.display = 'none'; // Hide loading message on error
                 });
         });
     </script>
