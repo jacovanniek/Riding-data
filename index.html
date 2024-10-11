@@ -29,7 +29,7 @@
         button {
             padding: 10px;
             font-size: 16px;
-            background-color: #4CAF50;
+            background-color: #e02525;
             color: white;
             border: none;
             cursor: pointer;
@@ -87,11 +87,11 @@
         <label for="name">Name:</label>
         <input type="text" id="name" name="name" required><br><br>
 
-        <label for="email">Email:</label>
+        <!-- <label for="email">Email:</label>
         <input type="email" id="email" name="email" required><br><br>
 
         <label for="phone">Phone:</label>
-        <input type="text" id="phone" name="phone" required><br><br>
+        <input type="text" id="phone" name="phone" required><br><br> -->
 
         <label for="activityType">Activity Type:</label>
         <select id="activityType" name="activityType" required>
@@ -101,6 +101,26 @@
             <option value="Moto - MX / Enduro">Moto - MX / Enduro</option>
             <option value="Equestrian">Equestrian</option>
             <option value="Other">Other</option>
+        </select><br><br>
+
+         <!-- Yes/No Selector for Crash/Fall -->
+        <label for="crashFall">Did you have a crash / fall during your ride?</label>
+        <select id="crashFall" name="crashFall" required>
+            <option value="Yes">Yes</option>
+            <option value="No">No</option>
+        </select><br><br>
+
+        <!-- Time Selection (hidden initially) -->
+        <div id="timeDiv" style="display:none;">
+            <label for="rideTime">Ride Time (HH:MM):</label>
+            <input type="text" id="rideTime" name="rideTime" placeholder="HH:MM" pattern="\d{1,2}:\d{2}">
+        </div><br>
+
+        <!-- Yes/No Selector for Near Misses -->
+        <label for="nearMiss">Did you have any near misses (almost crashed/fell)?</label>
+        <select id="nearMiss" name="nearMiss" required>
+            <option value="Yes">Yes</option>
+            <option value="No">No</option>
         </select><br><br>
 
         <input type="submit" value="Submit">
@@ -115,6 +135,24 @@
     </div> <!-- Loading message -->
     <div id="thankYou">Thank you for submitting the form!</div> <!-- Thank you message -->
     
+    <script>
+        document.getElementById('crashFall').addEventListener('change', function() {
+            var crashFallValue = this.value;
+            var timeDiv = document.getElementById('timeDiv');
+            var rideTimeInput = document.getElementById('rideTime');
+        
+            if (crashFallValue === 'Yes') {
+                timeDiv.style.display = 'block';  // Show the time input
+                rideTimeInput.required = true;    // Make it required
+            } else {
+                timeDiv.style.display = 'none';   // Hide the time input
+                rideTimeInput.value = '';         // Clear the time input
+                rideTimeInput.required = false;   // Make it optional
+            }
+        });
+        </script>     
+
+
     <script>
         const html5QrCodeScanner = new Html5Qrcode("reader", {
             experimentalFeatures: {
