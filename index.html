@@ -3,8 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QR Code Data Submission</title>
+    <title>Riding data user and activity info</title>
     <style>
+        input, select {
+            font-size: 16px; /* Change this value to increase/decrease size */
+            font-family: Arial, sans-serif; /* Change to your preferred font */
+            margin: 5px 0; /* Optional: adds spacing between fields */
+        }
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
@@ -40,8 +45,15 @@
 </head>
 <body>
 
-    <h1>QR Code Form</h1>
+    <img src="leatt-logo.png" alt="Logo" style="position: absolute; top: 10px; left: 10px; width: 100px; height: auto;">
+    
+    <h1>Ride details</h1>
 
+    <!-- QR Code Scanner Display -->
+    <div id="reader" style="width: 100%;"></div>
+    <button id="stopScanner" style="display: none;">Stop Scanner</button>
+
+    <!-- Form Display -->
     <form id="myForm">
         <label for="qrCodeValue">QR Code Value:</label>
         <input type="text" id="qrCodeValue" name="qrCodeValue" required><br><br>
@@ -66,10 +78,10 @@
         <input type="submit" value="Submit">
     </form>
 
-    <div id="qrCodeReader" style="display: none;">
+    <!-- <div id="qrCodeReader" style="display: none;">
         <div id="reader" style="width: 300px; height: 300px;"></div>
         <button id="rescanBtn">Rescan QR Code</button>
-    </div>
+    </div> -->
 
     <p id="responseMessage"></p>
 
