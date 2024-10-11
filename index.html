@@ -9,6 +9,7 @@
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
+            text-align: center; /* Center align for loading and thank you messages */
         }
         #reader {
             width: 300px;
@@ -36,7 +37,7 @@
         button:hover {
             background-color: #45a049;
         }
-        #loading {
+        #loading, #thankYou {
             display: none; /* Hide loading initially */
             text-align: center;
             margin-top: 20px;
@@ -91,14 +92,21 @@
         <!-- <button type="submit">Submit</button> -->
     </form>
 
+
+
     <!-- <div id="qrCodeReader" style="display: none;">
         <div id="reader" style="width: 300px; height: 300px;"></div>
         <button id="rescanBtn">Rescan QR Code</button>
     </div> -->
 
-    <div id="loading">Submitting... Please wait...</div> <!-- wait message -->
+    <!-- 
+    <div id="loading">Submitting... Please wait...</div> // wait message 
     <p id="responseMessage"></p>
+-->
 
+    <p id="responseMessage"></p>
+    <div id="loading">Loading...</div> <!-- Loading message -->
+    <div id="thankYou">Thank you for submitting the form!</div> <!-- Thank you message -->
 
     
     <script>
@@ -142,8 +150,13 @@
         document.getElementById('myForm').addEventListener('submit', function(e) {
             e.preventDefault(); // Prevent the default form submission
 
-            // Show loading message
-            document.getElementById('loading').style.display = 'block';
+            // // Show loading message
+            // document.getElementById('loading').style.display = 'block';
+
+            // Hide QR scanner and form fields
+            document.getElementById("reader").style.display = "none";
+            this.style.display = "none";
+            document.getElementById("loading").style.display = "block"; // Show loading message
 
             // Get form data
             const formData = new URLSearchParams(new FormData(this)).toString();
