@@ -4,27 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QR Code Data Submission</title>
-    <script src="https://unpkg.com/html5-qrcode/minified/html5-qrcode.min.js"></script>
-    <style>
-        #reader {
-            width: 300px;
-            height: 300px;
-            border: 1px solid #ccc;
-            margin-bottom: 20px;
-        }
-    </style>
 </head>
 <body>
 
     <h1>QR Code Form</h1>
 
-    <div id="reader"></div>
-    <button id="startScan">Start QR Code Scan</button>
-    <button id="stopScan" style="display: none;">Stop QR Code Scan</button>
-
     <form id="myForm">
         <label for="qrCodeValue">QR Code Value:</label>
-        <input type="text" id="qrCodeValue" name="qrCodeValue" required><br><br>
+        <input type="text" id="qrCodeValue" name="qrCodeValue" value="www.example.com" required><br><br>
 
         <label for="name">Name:</label>
         <input type="text" id="name" name="name" value="John Doe" required><br><br>
@@ -41,43 +28,6 @@
     <p id="responseMessage"></p>
 
     <script>
-        const html5QrCode = new Html5Qrcode("reader");
-        let scanning = false;
-
-        // Start scanning
-        document.getElementById("startScan").addEventListener("click", () => {
-            if (!scanning) {
-                scanning = true;
-                html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: { width: 250, height: 250 } },
-                    (decodedText) => {
-                        document.getElementById("qrCodeValue").value = decodedText;
-                    },
-                    (errorMessage) => {
-                        // Handle errors here
-                    }
-                ).catch(err => {
-                    console.log("Error starting QR code scanner: ", err);
-                });
-                document.getElementById("startScan").style.display = "none";
-                document.getElementById("stopScan").style.display = "block";
-            }
-        });
-
-        // Stop scanning
-        document.getElementById("stopScan").addEventListener("click", () => {
-            if (scanning) {
-                scanning = false;
-                html5QrCode.stop().then(ignore => {
-                    console.log("QR Code scanning stopped.");
-                }).catch(err => {
-                    console.log("Error stopping QR code scanner: ", err);
-                });
-                document.getElementById("startScan").style.display = "block";
-                document.getElementById("stopScan").style.display = "none";
-            }
-        });
-
-        // Form submission
         document.getElementById('myForm').addEventListener('submit', function(e) {
             e.preventDefault(); // Prevent the default form submission
 
