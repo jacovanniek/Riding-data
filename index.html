@@ -26,16 +26,40 @@
             padding: 10px;
             font-size: 16px;
         }
+        /* Style for the Submit button (red) */
+        input[type="submit"] {
+            background-color: #e02525;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+        /* Style for the Rescan button (gray) */
+        #rescanBtn {
+            background-color: gray;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+        }
         button {
             padding: 10px;
             font-size: 16px;
-            background-color: #e02525;
+            background-color: #9b9696;
             color: white;
             border: none;
             cursor: pointer;
         }
         button:hover {
-            background-color: #45a049;
+            background-color: #381515;
+        }
+                /* Optional: Add some hover effects for better user experience */
+                input[type="submit"]:hover {
+            background-color: darkred;
+        }
+
+        #rescanBtn:hover {
+            background-color: darkgray;
         }
         #loading, #thankYou {
             display: none; /* Hide loading initially */
@@ -106,8 +130,8 @@
          <!-- Yes/No Selector for Crash/Fall -->
         <label for="crashFall">Did you have a crash / fall during your ride?</label>
         <select id="crashFall" name="crashFall" required>
-            <option value="Yes">Yes</option>
             <option value="No">No</option>
+            <option value="Yes">Yes</option>
         </select><br><br>
 
         <!-- Time Selection (hidden initially) -->
@@ -119,8 +143,8 @@
         <!-- Yes/No Selector for Near Misses -->
         <label for="nearMiss">Did you have any near misses (almost crashed/fell)?</label>
         <select id="nearMiss" name="nearMiss" required>
-            <option value="Yes">Yes</option>
             <option value="No">No</option>
+            <option value="Yes">Yes</option>
         </select><br><br>
 
         <input type="submit" value="Submit">
