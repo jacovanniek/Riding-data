@@ -280,5 +280,43 @@
         });
     </script>
 
+    <script>
+        document.getElementById('ride-data-form').addEventListener('submit', async function(event) {
+            event.preventDefault(); // Prevent form from refreshing the page
+            document.getElementById('loading').style.display = 'block';
+
+            // Gather form data
+            const formData = {
+                riderName: document.getElementById('rider-name').value,
+                activityType: document.getElementById('activity-type').value,
+                crash: document.getElementById('crash').value,
+                time: document.getElementById('time').value,
+                nearMiss: document.getElementById('near-miss').value,
+            };
+
+            try {
+                // Send data to AWS API endpoint
+                const response = await fetch('leatt-crash-detection.cirgxy0dmlpe.eu-west-1.rds.amazonaws.com', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData),
+                });
+
+                if (response.ok) {
+                    alert('Data submitted successfully!');
+                } else {
+                    const errorText = await response.text();
+                    alert('Failed to submit data: ' + errorText);
+                }
+            } catch (error) {
+                alert('An error occurred: ' + error.message);
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+            }
+        });
+    </script>
+
+
+
 </body>
 </html>
