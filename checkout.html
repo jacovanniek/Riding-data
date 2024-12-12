@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Check-out</title>
+    <script>
+      function submitCheckoutForm() {
+        const data = {
+          qrCodeValue: document.getElementById("qrCodeValue").value,
+          name: document.getElementById("name").value,
+          contactNr: document.getElementById("contactNr").value,
+          activityType: document.getElementById("activityType").value,
+        };
+
+        google.script.run
+          .withSuccessHandler((response) => alert(response))
+          .submitCheckout(data);
+      }
+    </script>
+  </head>
+  <body>
+    <h1>Check-out</h1>
+    <form onsubmit="submitCheckoutForm(); return false;">
+      <label>QR Code Value:</label>
+      <input type="text" id="qrCodeValue" required><br>
+      <label>Name:</label>
+      <input type="text" id="name"><br>
+      <label>Contact Number:</label>
+      <input type="text" id="contactNr"><br>
+      <label>Activity Type:</label>
+      <input type="text" id="activityType"><br>
+      <button type="submit">Submit</button>
+    </form>
+  </body>
+</html>

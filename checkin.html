@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Check-in</title>
+    <script>
+      function submitCheckinForm() {
+        const data = {
+          qrCodeValue: document.getElementById("qrCodeValue").value,
+          crashFall: document.getElementById("crashFall").value,
+          rideTime: document.getElementById("rideTime").value,
+          nearMiss: document.getElementById("nearMiss").value,
+        };
+
+        google.script.run
+          .withSuccessHandler((response) => alert(response))
+          .submitCheckin(data);
+      }
+    </script>
+  </head>
+  <body>
+    <h1>Check-in</h1>
+    <form onsubmit="submitCheckinForm(); return false;">
+      <label>QR Code Value:</label>
+      <input type="text" id="qrCodeValue" required><br>
+      <label>Crash/Fall:</label>
+      <input type="text" id="crashFall"><br>
+      <label>Ride Time:</label>
+      <input type="text" id="rideTime"><br>
+      <label>Near Miss:</label>
+      <input type="text" id="nearMiss"><br>
+      <button type="submit">Submit</button>
+    </form>
+  </body>
+</html>
