@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Riding data user and activity info</title>
+    <title>Riding Data - Check-out and Check-in</title>
     <style>
 
         body {
@@ -94,40 +94,68 @@
 <body>
 
     <img src="leatt-logo-2.jpg" alt="Logo" style="position: absolute; top: 10px; left: 10px; width: 100px; height: auto;">
+
+
     
     <!-- <h1 style="display: inline-block; margin-left: 20px; vertical-align: top;">Ride details</h1> Adjust margin-left for spacing -->
     <h1 style="margin-top: 120px;">Ride details</h1> <!-- Adjust margin-top based on logo height -->
     <p>Please scan the QR code on your datalogger (look on the backside or under the straps) and select your activity type.</p> <!-- Introductory paragraph -->
 
+    <!-- Toggle Buttons for Forms -->
+    <div>
+        <button id="showCheckoutForm">Check-out</button>
+        <button id="showCheckinForm">Check-in</button>
+    </div>
+
     <!-- QR Code Scanner Display -->
     <div id="reader" style="width: 100%;"></div>
     <!-- <button id="stopScanner" style="display: none;">Stop Scanner</button> -->
 
-    <!-- Form Display -->
-    <form id="myForm">
-        <label for="qrCodeValue">QR Code Value:</label>
-        <input type="text" id="qrCodeValue" name="qrCodeValue" required><br><br>
+
+    <!-- Check-out Form -->
+    <form id="checkoutForm" style="display: none;">
+        <h2>Check-out</h2>
+        <label for="qrCodeValueCheckout">QR Code Value:</label>
+        <input type="text" id="qrCodeValueCheckout" name="qrCodeValue" required>
 
         <label for="name">Name:</label>
-        <input type="text" id="name" name="name" required><br><br>
+        <input type="text" id="name" name="name" required>
 
-        <!-- <label for="email">Email:</label>
-        <input type="email" id="email" name="email" required><br><br>
-
-        <label for="phone">Phone:</label>
-        <input type="text" id="phone" name="phone" required><br><br> -->
+        <label for="contactnr">Contact Number:</label>
+        <input type="text" id="contactnr" name="contactnr" required>
 
         <label for="activityType">Activity Type:</label>
         <select id="activityType" name="activityType" required>
             <option value="MTB - XC / Gravel">MTB - XC / Gravel</option>
             <option value="MTB - Enduro / DH">MTB - Enduro / DH</option>
-            <option value="Moto - ADV / General">Moto - ADV / General</option>
-            <option value="Moto - MX / Enduro">Moto - MX / Enduro</option>
+            <option value="Moto - ADV / Road">Moto - ADV / Road</option>
+            <option value="Moto - MX">Moto - MX</option>
+            <option value="Moto - Enduro">Moto - Enduro</option>
             <option value="Equestrian">Equestrian</option>
             <option value="Other">Other</option>
-        </select><br><br>
+        </select>
 
-         <!-- Yes/No Selector for Crash/Fall -->
+        <input type="submit" value="Submit Check-out">
+        <button type="button" id="rescanBtn">Rescan</button> <!-- rescan button-->
+    </form>
+
+    <p id="responseMessage"></p>
+    <div id="loading">
+        <div class="spinner"></div> <!-- Loading spinner -->
+        Loading...
+    </div> <!-- Loading message -->
+    <div id="thankYou">Thank you for submitting the form!</div> <!-- Thank you message -->
+
+
+
+    <!-- Check-in Form -->
+    <form id="checkinForm" style="display: none;">
+        <h2>Check-in</h2>
+        <label for="qrCodeValueCheckin">QR Code Value:</label>
+        <input type="text" id="qrCodeValueCheckin" name="qrCodeValue" required>
+
+
+        <!-- Yes/No Selector for Crash/Fall -->
         <label for="crashFall">Did you have a crash / fall during your ride?</label>
         <select id="crashFall" name="crashFall" required>
             <option value="No">No</option>
@@ -149,9 +177,8 @@
             <option value="Yes">Yes</option>
         </select><br><br>
 
-        <input type="submit" value="Submit">
+        <input type="submit" value="Submit Check-in">
         <button type="button" id="rescanBtn">Rescan</button> <!-- rescan button-->
-        <!-- <button type="submit">Submit</button> -->
     </form>
 
     <p id="responseMessage"></p>
@@ -160,7 +187,10 @@
         Loading...
     </div> <!-- Loading message -->
     <div id="thankYou">Thank you for submitting the form!</div> <!-- Thank you message -->
-    
+
+
+
+
     <script>
             // Function to generate time dropdown options in 5-minute intervals
         function generateTimeOptions() {
@@ -203,10 +233,26 @@
 
 
     <script>
+        const checkoutForm = document.getElementById('checkoutForm');
+        const checkinForm = document.getElementById('checkinForm');
+        const qrCodeInputCheckout = document.getElementById('qrCodeValueCheckout');
+        const qrCodeInputCheckin = document.getElementById('qrCodeValueCheckin');
+
+        document.getElementById('showCheckoutForm').addEventListener('click', () => {
+            checkoutForm.style.display = 'block';
+            checkinForm.style.display = 'none';
+        });
+
+        document.getElementById('showCheckinForm').addEventListener('click', () => {
+            checkoutForm.style.display = 'none';
+            checkinForm.style.display = 'block';
+        });
+
+
+
+        // QR CODE SCANNER
         const html5QrCodeScanner = new Html5Qrcode("reader", {
-            experimentalFeatures: {
-                useBarCodeDetectorIfSupported: true
-            },
+            experimentalFeatures: {useBarCodeDetectorIfSupported: true},
             formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE]
         });
 
@@ -219,14 +265,20 @@
             });
         }
 
+        qrCodeScanner.start({ facingMode: "environment" }, { fps: 10, qrbox: 250 }, (decodedText) => {
+            qrCodeInputCheckout.value = decodedText;
+            qrCodeInputCheckin.value = decodedText;
+            qrCodeScanner.stop();
+        });
+
         // Start scanning when the page loads
-        html5QrCodeScanner.start(
+        /* html5QrCodeScanner.start(
             { facingMode: "environment" },
             { fps: 10, qrbox: 250 },
             onScanSuccess
         ).catch(err => {
             console.error("Failed to start scanning:", err);
-        });
+        }); */
 
         // Rescan button
         document.getElementById("rescanBtn").addEventListener("click", function() {
@@ -239,12 +291,9 @@
         });
         
 
-        // Form submission
-        document.getElementById('myForm').addEventListener('submit', function(e) {
-            e.preventDefault(); // Prevent the default form submission
-
-            // // Show loading message
-            // document.getElementById('loading').style.display = 'block';
+        // Form Submissions
+        checkoutForm.addEventListener('submit', (e) => {
+            e.preventDefault();
 
             // Hide QR scanner and form fields
             document.body.style.overflow = 'hidden'; // Prevent scrolling
@@ -255,29 +304,68 @@
             // Hide the introductory paragraph when loading
             document.querySelector("p").style.display = "none"; // Hide introductory paragraph
 
-
-            // Get form data
-            const formData = new URLSearchParams(new FormData(this)).toString();
-
-            // Update the URL with your web app deployment URL
-            const url = `https://script.google.com/macros/s/AKfycbwaICXHotyVGLW4FnZF7gfXU--tNBfWjlzXdT0rKdUpQ2RF9R6tO9NHmD9t9u5zDQ/exec?${formData}`;
-
-            // Use Fetch API to send data to the Google Apps Script
-            fetch(url)
-                .then(response => response.text())
-                .then(data => {
-                    document.getElementById('responseMessage').innerText = 'Thank you for submitting the form!';
-                    // document.getElementById('myForm').reset(); // Reset form fields
-                    // document.getElementById('myForm').style.display = 'none'; // Hide form
-                    document.getElementById('loading').style.display = 'none'; // Hide loading message
-                    console.log('Success:', data);
-                })
-                .catch((error) => {
-                    document.getElementById('responseMessage').innerText = 'Error submitting form: ' + error;
-                    console.error('Submission error:', error);
-                    document.getElementById('loading').style.display = 'none'; // Hide loading message on error
-                });
+            const url = "https://script.google.com/macros/s/AKfycbxjwUIzwePVjFSQ1IquRGATueBopZqIEx1Z6R86-8JGHluxEGAluYX5C2HDr7zhEOg/exec";
+            fetch(url, { method: 'POST', body: new FormData(checkoutForm) });
         });
+
+        checkinForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            // Hide QR scanner and form fields
+            document.body.style.overflow = 'hidden'; // Prevent scrolling
+            document.getElementById("reader").style.display = "none";
+            this.style.display = "none";
+            document.getElementById("loading").style.display = "block"; // Show loading message
+
+            // Hide the introductory paragraph when loading
+            document.querySelector("p").style.display = "none"; // Hide introductory paragraph
+
+            const url = "https://script.google.com/macros/s/AKfycbxjwUIzwePVjFSQ1IquRGATueBopZqIEx1Z6R86-8JGHluxEGAluYX5C2HDr7zhEOg/exec";
+            fetch(url, { method: 'POST', body: new FormData(checkinForm) });
+        });
+
+
+
+        // // Form submission
+        // document.getElementById('myForm').addEventListener('submit', function(e) {
+        //     e.preventDefault(); // Prevent the default form submission
+
+        //     // // Show loading message
+        //     // document.getElementById('loading').style.display = 'block';
+
+        //     // Hide QR scanner and form fields
+        //     document.body.style.overflow = 'hidden'; // Prevent scrolling
+        //     document.getElementById("reader").style.display = "none";
+        //     this.style.display = "none";
+        //     document.getElementById("loading").style.display = "block"; // Show loading message
+
+        //     // Hide the introductory paragraph when loading
+        //     document.querySelector("p").style.display = "none"; // Hide introductory paragraph
+
+
+        //     // Get form data
+        //     const formData = new URLSearchParams(new FormData(this)).toString();
+
+        //     // Update the URL with your web app deployment URL
+        //     const url = `https://script.google.com/macros/s/AKfycbwaICXHotyVGLW4FnZF7gfXU--tNBfWjlzXdT0rKdUpQ2RF9R6tO9NHmD9t9u5zDQ/exec?${formData}`;
+
+        //     // Use Fetch API to send data to the Google Apps Script
+        //     fetch(url)
+        //         .then(response => response.text())
+        //         .then(data => {
+        //             document.getElementById('responseMessage').innerText = 'Thank you for submitting the form!';
+        //             // document.getElementById('myForm').reset(); // Reset form fields
+        //             // document.getElementById('myForm').style.display = 'none'; // Hide form
+        //             document.getElementById('loading').style.display = 'none'; // Hide loading message
+        //             console.log('Success:', data);
+        //         })
+        //         .catch((error) => {
+        //             document.getElementById('responseMessage').innerText = 'Error submitting form: ' + error;
+        //             console.error('Submission error:', error);
+        //             document.getElementById('loading').style.display = 'none'; // Hide loading message on error
+        //         });
+        // });
+
     </script>
 
 </body>
